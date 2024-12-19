@@ -1,0 +1,19 @@
+package com.sapient.kafka.util;
+
+public class UserConstants {
+
+	public static final String USER_TOPIC = "file-upload-topic";
+	public static final String ABSENT = "absent";
+	public static final String HALF_DAY = "half day";
+	public static final String PRESENT = "Present";
+	public static final String ACCOUNT_ADDED = "User account has been added, Employee ID = ";
+	public static final String CHECKIN_SHOULD_NOT_BE_NULL = "Checkin and Checkout should not be null";
+	public static final String USER_UPDATED_SUCESSFULLY = "User updated Successfully";
+	public static final String USER_UPDATE_FAILED = "User update Failed";
+	public static final String FAILED_TO_ADD_USER = "Failed to add the user";
+	public static final String USER_EMPID_IS = "Users Emp Id Is: ";
+	public static final String CHECKIN = " Checkin ";
+	public static final String CHECKOUT = " checkout ";
+	public static final String INSIDE_CONSUMER = "Inside consumerUserData() method START";
+
+}

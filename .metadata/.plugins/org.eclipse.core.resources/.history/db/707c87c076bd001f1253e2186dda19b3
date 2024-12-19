@@ -1,0 +1,5 @@
+package com.sapient.kafka.repository;
+
+public class UserRepository {
+
+}

@@ -1,0 +1,10 @@
+spring.kafka.producer.bootstrap-servers= localhost:9092
+spring.kafka.producer.key-serializer = org.apache.kafka.common.serialization.StringSerializer
+spring.kafka.producer.value-serializer = org.springframework.kafka.support.serializer.JsonSerializer
+
+#server.port = 9084
+management.endpoints.web.exposure.include=*
+
+#logging
+logging.file.path=/path/to/C:/kafka_project/logs
+logging.file.name=C:/kafka_project/logs/application.log

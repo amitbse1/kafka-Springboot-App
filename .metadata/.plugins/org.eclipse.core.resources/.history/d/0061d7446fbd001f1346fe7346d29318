@@ -1,0 +1,32 @@
+package com.sapient.kafka.controllers;
+
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.sapient.kafka.dto.AttendanceUser;
+import com.sapient.kafka.service.UserProducerService;
+import com.sapient.kafka.util.UserAttendanceConstants;
+
+@RestController
+@RequestMapping("/userapi")
+public class UserController {
+
+	Logger logger = Logger.getLogger(UserController.class.getName());
+
+	@Autowired
+	private UserProducerService service;
+
+	@PostMapping("/publishUserData")
+	public void sendUserData(@RequestBody AttendanceUser user) {
+		String message = UserAttendanceConstants.SAVING_DATA_TO_KAFKA_TOPIC + user.getEmployeeId()
+		+ UserAttendanceConstants.USER_OBJRCT + user.toString();
+		logger.info(message);
+		service.sendUserData(user);
+	}
+
+}

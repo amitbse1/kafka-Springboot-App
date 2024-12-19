@@ -1,0 +1,35 @@
+package com.sapient.kafka.service;
+
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.sapient.kafka.entity.AttendanceDetail;
+import com.sapient.kafka.repository.TenantRepository;
+
+@Service
+public class UserConsumerQueryService {
+
+	private TenantRepository attendancerepository;
+
+	Logger logger = Logger.getLogger(UserConsumerQueryService.class.getName());
+
+	@Autowired
+	public UserConsumerQueryService(TenantRepository attendancerepository) {
+		super();
+		this.attendancerepository = attendancerepository;
+	}
+
+	public List<AttendanceDetail> findAllUser() {
+		List<AttendanceDetail> attendanceList = (List<AttendanceDetail>) attendancerepository.findAll();
+
+		if (attendanceList != null) {
+			return attendanceList;
+		}
+		return null;
+	}
+
+	
+}

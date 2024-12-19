@@ -1,0 +1,5 @@
+package com.sapient.kafka.dto;
+
+public class Tenant {
+
+}

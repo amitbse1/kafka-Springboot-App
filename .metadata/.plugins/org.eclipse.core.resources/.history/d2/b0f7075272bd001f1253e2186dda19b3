@@ -1,0 +1,15 @@
+package com.sapient.kafka.dto;
+
+public class Tenant {
+
+	private String TenantId;
+
+	private String DeviceId;
+
+	private String date;
+
+	private String departmentId;
+
+	private Boolean available;
+
+}

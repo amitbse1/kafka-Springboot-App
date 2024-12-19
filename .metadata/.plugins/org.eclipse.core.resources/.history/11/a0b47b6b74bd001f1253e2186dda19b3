@@ -1,0 +1,144 @@
+package com.sapient.kafka.service;
+
+import java.time.LocalTime;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+import com.sapient.kafka.dto.User;
+import com.sapient.kafka.entity.TenantDetail;
+import com.sapient.kafka.repository.TenantRepository;
+import com.sapient.kafka.util.UserConstants;
+
+@Service
+public class UserConsumerCommandService {
+
+	private TenantRepository attendancerepository;
+
+	Logger logger = Logger.getLogger(UserConsumerCommandService.class.getName());
+
+	@Autowired
+	public UserConsumerCommandService(TenantRepository attendancerepository) {
+		super();
+		this.attendancerepository = attendancerepository;
+	}
+	
+	@KafkaListener(topics = "file-upload-topic", groupId = "multi-tenant-group")
+    public void listenFileUploadEvent(FileUploadEvent event) {
+        try {
+            String tenantId = event.getTenantId();
+            String fileName = event.getFileName();
+            String s3Bucket = event.getS3Bucket();
+
+            // Retrieve file from S3
+            InputStream fileInputStream = s3Service.downloadFile(tenantId, s3Bucket, fileName);
+
+            // Process the file
+            fileProcessingService.processFile(tenantId, fileInputStream);
+
+            // Delete the file from S3 after successful processing
+            s3Service.deleteFile(tenantId, s3Bucket, fileName);
+
+        } catch (Exception e) {
+            // Handle failure (e.g., send alert, log error)
+            System.out.println("Error processing file: " + e.getMessage());
+            // Optionally, publish failure alert to another Kafka topic or SNS
+        }
+    }
+	
+	@KafkaListener(topics = { UserConstants.USER_TOPIC })
+	public String consumerUserData(User attendancedetails) {
+		logger.info(UserConstants.USER_EMPID_IS + attendancedetails.getEmployeeId()
+				+ UserConstants.CHECKIN + attendancedetails.getCheckin() + UserConstants.CHECKOUT
+				+ attendancedetails.getCheckout());
+		
+		
+		logger.info(UserConstants.INSIDE_CONSUMER);
+		TenantDetail attendancedetail = new TenantDetail();
+
+		attendancedetail.setCheckin(attendancedetails.getCheckin());
+		attendancedetail.setCheckout(attendancedetails.getCheckout());
+		attendancedetail.setEmployeeId(attendancedetails.getEmployeeId());
+		attendancedetail.setDepartmentId(attendancedetails.getDepartmentId());
+		attendancedetail.setDate(attendancedetails.getDate());
+		attendancedetail.setMonth(attendancedetails.getMonth());
+		attendancedetail.setAvailable(attendancedetails.getAvailable());
+
+		// business logic
+		if (attendancedetail.getCheckin() != null
+				&& attendancedetail.getCheckout() != null) {
+
+			LocalTime in = LocalTime.parse(attendancedetail.getCheckin().toString());
+			LocalTime out = LocalTime.parse(attendancedetail.getCheckout().toString());
+
+			int hoursDiff = (out.getHour() - in.getHour()), minsDiff = (int) Math.abs(out.getMinute() - in.getMinute()),
+					secsDiff = (int) Math.abs(out.getSecond() - in.getSecond());
+
+			String msgHours = hoursDiff + ":" + minsDiff + ":" + secsDiff;
+			logger.info(msgHours);
+
+			// set attendance count
+			attendancedetail.setAttencount(hoursDiff + ":" + minsDiff);
+
+			String shift = UserConstants.ABSENT;
+
+			// Calculate attendance formula
+//			if (hoursDiff < 4)
+//				shift = UserAttendanceConstants.ABSENT;
+			if (hoursDiff >= 4 && hoursDiff < 8)
+				shift = UserConstants.HALF_DAY;
+			else if (hoursDiff >= 8)
+				shift = UserConstants.PRESENT;
+
+			// shift from kafka to other system
+
+			// set shift
+			attendancedetail.setShift(shift);
+			attendancerepository.save(attendancedetail);
+
+			return UserConstants.ACCOUNT_ADDED + attendancedetail.getEmployeeId();
+
+		} else
+			return UserConstants.CHECKIN_SHOULD_NOT_BE_NULL;
+
+	}
+
+	public String updateUser(String employeeid, Boolean available, String checkout, String date) {
+		TenantDetail attendanceList = (TenantDetail) attendancerepository.findByEmployeeIdAndDate(employeeid,
+				date);
+		if (attendanceList != null) {
+
+			attendanceList.setAvailable(available);
+			attendanceList.setCheckout(checkout);
+
+			LocalTime in = LocalTime.parse(attendanceList.getCheckin().toString());
+			LocalTime out = LocalTime.parse(checkout.toString());
+
+			int hoursDiff = (out.getHour() - in.getHour()), minsDiff = (int) Math.abs(out.getMinute() - in.getMinute()),
+					secsDiff = (int) Math.abs(out.getSecond() - in.getSecond());
+
+			String hoursMsg = hoursDiff + ":" + minsDiff + ":" + secsDiff;
+			logger.info(hoursMsg);
+
+			// set attendance count
+			attendanceList.setAttencount(hoursDiff + ":" + minsDiff);
+
+			String shift = UserConstants.ABSENT;
+
+			// Calculate attendance formula
+			if (hoursDiff >= 4 && hoursDiff < 8)
+				shift = UserConstants.HALF_DAY;
+			else if (hoursDiff >= 8)
+				shift = UserConstants.PRESENT;
+
+			// set shift
+			attendanceList.setShift(shift);
+			attendancerepository.save(attendanceList);
+
+			return UserConstants.USER_UPDATED_SUCESSFULLY;
+		}
+		return UserConstants.USER_UPDATE_FAILED;
+	}
+}

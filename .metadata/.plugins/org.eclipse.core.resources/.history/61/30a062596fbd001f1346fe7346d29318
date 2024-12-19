@@ -1,0 +1,11 @@
+package com.sapient.kafka.util;
+
+public class UserAttendanceConstants {
+
+	public static final String USER_TOPIC = "user-topic";
+	public static final String SAVING_DATA_TO_KAFKA_TOPIC = "saving data into kafka topic";
+	public static final String USER_OBJRCT = " User Object :: ";
+	
+	
+
+}

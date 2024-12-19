@@ -1,0 +1,34 @@
+server:
+  port: 9070
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: USER-API-GATEWAY
+    
+  cloud:
+    gateway:
+      routes:
+      - id: USER-TENANT-CONSUMER
+        uri: http://localhost:9085/
+        predicates:
+        - Path=/TENANTdetails/**
+      - id: USER-TENANT-CONSUMER
+        uri: http://localhost:9085/
+        predicates:
+        - Path=/TENANTdetail/**
+      - id: USER-TENANT-CIRCUIT-BREAKER
+        uri: http://localhost:9086/
+        predicates:
+        - Path=/api/**
+      - id: USER-TENANT-PRODUCER
+        uri: http://localhost:9084/
+        predicates:
+        - Path=/userapi/**

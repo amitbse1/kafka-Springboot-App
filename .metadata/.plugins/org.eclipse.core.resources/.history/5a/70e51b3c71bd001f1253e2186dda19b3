@@ -1,0 +1,13 @@
+package com.sapient.kafka.repository;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import com.sapient.kafka.entity.AttendanceDetail;
+
+
+@Repository
+public interface AttendanceRepository extends CrudRepository<AttendanceDetail, Long> {
+
+	AttendanceDetail findByEmployeeIdAndDate(String employeeid, String date);
+}

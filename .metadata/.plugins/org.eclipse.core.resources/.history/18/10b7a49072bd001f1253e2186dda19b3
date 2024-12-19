@@ -1,0 +1,18 @@
+package com.sapient.kafka.dto;
+
+
+public class Tenant {
+
+	private Integer tenantId;
+
+	private String deviceId;
+
+	private String model;
+
+	private String manufacturer;
+
+	private String deviceType;
+	
+	private String approvalDate;
+
+}

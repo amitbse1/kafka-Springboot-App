@@ -1,0 +1,29 @@
+package com.sapient.kafka;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.sapient.kafka.dto.AttendanceUser;
+import com.sapient.kafka.service.UserProducerService;
+
+@SpringBootTest
+class UserproducerApplicationTests {
+
+	@Mock
+	private UserProducerService attendanceService;
+
+	@Test
+	void publishUserTest() {
+		AttendanceUser empattn = new AttendanceUser("105", "JAN", "2023-04-02", "205", true, "08:10:00", "17:10:00");
+
+		attendanceService.sendUserData(empattn);
+
+		verify(attendanceService, times(1)).sendUserData(empattn);
+
+	}
+
+}
